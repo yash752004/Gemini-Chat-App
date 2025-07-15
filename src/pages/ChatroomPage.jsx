@@ -6,11 +6,11 @@ import {
   TextField,
   Button,
   Avatar,
-//   Paper,
+  //   Paper,
   CircularProgress,
   Tooltip,
 } from "@mui/material";
-import { ArrowBack, Send, Image, ContentCopy } from "@mui/icons-material";
+import { Send, Image, ContentCopy } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addMessage, loadDummyMessages } from "../features/chat/chatSlice";
@@ -34,40 +34,47 @@ const ChatroomPage = () => {
   const bottomRef = useRef();
   const scrollContainerRef = useRef();
 
-  // Auto-scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!text && !image) return;
+ const handleSend = () => {
+  if (!text && !image) return;
 
-    const userMessage = {
-      id: uuidv4(),
-      sender: "user",
-      text,
-      image,
-      timestamp: new Date().toISOString(),
-    };
+  const inputText = text;
+
+  // Set typing true immediately on next tick:
+  setIsTyping(true);
+  const userMessage = {
+    id: uuidv4(),
+    sender: "user",
+    text,
+    image,
+    timestamp: new Date().toISOString(),
+  };
+
+  // Dispatch after small delay to allow UI update:
+  setTimeout(() => {
     dispatch(addMessage({ chatroomId: id, message: userMessage }));
 
     setText("");
     setImage(null);
 
-    setIsTyping(true);
     setTimeout(() => {
       const aiMessage = {
         id: uuidv4(),
         sender: "ai",
-        text: generateFakeReply(text),
+        text: generateFakeReply(inputText),
         timestamp: new Date().toISOString(),
       };
       dispatch(addMessage({ chatroomId: id, message: aiMessage }));
       setIsTyping(false);
-    }, 1200 + Math.random() * 1000);
+    }, 1200);
+  }, 0);
+};
 
-    toast.success("Message sent");
-  };
+
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -100,7 +107,8 @@ const ChatroomPage = () => {
   };
 
   const copyText = (msg) => {
-    navigator.clipboard.writeText(msg.text || "");
+    const value = msg.text || msg.image || "";
+    navigator.clipboard.writeText(value);
     toast.info("Copied to clipboard");
   };
 
@@ -115,123 +123,176 @@ const ChatroomPage = () => {
 
   return (
     <MainLayout>
-    <Box height="100vh" display="flex" flexDirection="column">
-     
-      <Box
-        display="flex"
-        alignItems="center"
-        p={2}
-        borderBottom="1px solid #ccc"
-        gap={2}
-      >
-        <IconButton onClick={() => navigate("/dashboard")}>
-          <ArrowBack />
-        </IconButton>
-        <Typography variant="h6">{chatroom.title}</Typography>
-      </Box>
+      <Box height="100vh" display="flex" flexDirection="column">
 
-      {/* Chat Area */}
-      <Box
-        flex={1}
-        overflow="auto"
-        p={2}
-        display="flex"
-        flexDirection="column-reverse"
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-      >
-        <div ref={bottomRef} />
-        {isTyping && (
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <Avatar>G</Avatar>
-            <Typography variant="body2" fontStyle="italic">
-              Gemini is typing...
-            </Typography>
-          </Box>
-        )}
 
-        {messages.map((msg) => (
+
+        {/* Chat Area */}
+        <Box
+          flex={1}
+          overflow="auto"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+        >
+          {isTyping === true && (
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              <Avatar>G</Avatar>
+              <Typography variant="body2" fontStyle="italic">
+                Gemini is typing...
+              </Typography>
+            </Box>
+          )}
+
+          {messages.map((msg) => (
+            <Box
+              key={msg.id}
+              alignSelf={msg.sender === "user" ? "flex-end" : "flex-start"}
+              maxWidth="80%"
+              my={1}
+              px={2}
+              py={1}
+              borderRadius={2}
+              bgcolor={msg.sender === "user" ? "primary.main" : "grey.300"}
+              color={msg.sender === "user" ? "#fff" : "#000"}
+              position="relative"
+              sx={{
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+              }}
+            >
+              {msg.image && (
+                <Box
+                  component="img"
+                  src={msg.image}
+                  alt="uploaded"
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    objectFit: "cover",
+                    borderRadius: 2,
+                  }}
+                />
+              )}
+
+
+              {msg.text && (
+                <Typography variant="body2" whiteSpace="pre-wrap">
+                  {msg.text}
+                </Typography>
+              )}
+
+              {/* Bottom area: timestamp + copy */}
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mt={0.5}
+              >
+                <Typography variant="caption" sx={{ color: "grey.800" }}>
+                  {new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Typography>
+
+                <Tooltip title="Click to copy" arrow>
+                  <ContentCopy
+                    sx={{
+                      fontSize: 16,
+                      opacity: 0.5,
+                    }}
+                    onClick={() => copyText(msg)}
+                  />
+                </Tooltip>
+              </Box>
+            </Box>
+          ))}
+
+          {loadingMore && (
+            <Box display="flex" justifyContent="center" my={2}>
+              <CircularProgress size={20} />
+            </Box>
+          )}
+
+          <div ref={bottomRef} />
+        </Box>
+
+
+        {image && (
           <Box
-            key={msg.id}
-            alignSelf={msg.sender === "user" ? "flex-end" : "flex-start"}
-            maxWidth="80%"
-            my={1}
+            display="flex"
+            justifyContent="flex-start"
+            alignItems="center"
             px={2}
-            py={1}
-            borderRadius={2}
-            bgcolor={msg.sender === "user" ? "primary.main" : "grey.300"}
-            color={msg.sender === "user" ? "#fff" : "#000"}
-            position="relative"
-            sx={{ cursor: "pointer" }}
-            onClick={() => copyText(msg)}
+            pt={1}
+            pb={0}
           >
-            {msg.image && (
-              <img
-                src={msg.image}
-                alt="uploaded"
-                style={{
-                  maxWidth: "100%",
-                  borderRadius: 8,
-                  marginBottom: msg.text ? 8 : 0,
-                }}
-              />
-            )}
-            {msg.text && <Typography variant="body2">{msg.text}</Typography>}
-            <Tooltip title="Click to copy" arrow>
-              <ContentCopy
-                sx={{
-                  position: "absolute",
-                  bottom: 4,
-                  right: 4,
-                  fontSize: 16,
-                  opacity: 0.5,
-                }}
-              />
-            </Tooltip>
-          </Box>
-        ))}
-
-        {loadingMore && (
-          <Box display="flex" justifyContent="center" my={2}>
-            <CircularProgress size={20} />
+            <Box
+              component="img"
+              src={image}
+              alt="preview"
+              sx={{
+                width: 100,
+                height: 100,
+                borderRadius: 2,
+                border: "1px solid #ccc",
+              }}
+            />
+            <Button
+              onClick={() => setImage(null)}
+              size="small"
+              sx={{ ml: 2 }}
+              color="error"
+            >
+              Remove
+            </Button>
           </Box>
         )}
-      </Box>
 
-      {/* Input */}
-      <Box
-        component="form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSend();
-        }}
-        display="flex"
-        alignItems="center"
-        p={2}
-        gap={1}
-        borderTop="1px solid #ccc"
-      >
-        <TextField
-          fullWidth
-          size="small"
-          placeholder="Type a message"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <IconButton component="label">
-          <Image />
-          <input
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={handleFileChange}
+
+        {/* Input */}
+        <Box
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSend();
+          }}
+          display="flex"
+          alignItems="center"
+          p={2}
+          gap={1}
+          position="sticky"
+          bottom={0}
+          bgcolor="background.paper"
+          zIndex={1}
+          borderTop="1px solid #ccc"
+        >
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Type a message"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
           />
-        </IconButton>
-        <Button variant="contained" type="submit">
-          <Send />
-        </Button>
+          <IconButton component="label">
+            <Image />
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleFileChange}
+            />
+          </IconButton>
+          <Button variant="contained" type="submit">
+            <Send />
+          </Button>
+        </Box>
       </Box>
-    </Box>
     </MainLayout>
   );
 };

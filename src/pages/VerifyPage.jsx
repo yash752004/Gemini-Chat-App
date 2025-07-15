@@ -46,7 +46,7 @@ const VerifyPage = () => {
 
         navigate("/dashboard");
       }, 2000);
-      
+
     } else {
       alert("Incorrect code");
     }
@@ -56,7 +56,7 @@ const VerifyPage = () => {
     <AuthCard
       icon={<Avatar sx={{ bgcolor: "#0ea5e9", mx: "auto" }}><ShieldIcon /></Avatar>}
       title="Verify Your Phone"
-      subtitle="Enter the 6-digit code sent to your phone number\nFor demo purposes, use: 123456"
+      subtitle="Enter the 6-digit code sent to your phone number For demo purposes, use: 123456"
     >
       <form onSubmit={handleSubmit(onSubmit)}>
         <Controller
@@ -81,12 +81,20 @@ const VerifyPage = () => {
           Verify Code
         </Button>
         <Box mt={2} textAlign="center">
-          <Typography variant="body2">
-            Didn’t receive the code?
+          <Typography variant="body2" color="textSecondary">
+            Resend code in {timer > 0 ? timer : "00"} seconds
           </Typography>
-          <Typography variant="body2" color="gray">
-            Resend in {timer}s
-          </Typography>
+          {timer === 0 && (
+            <Button
+              variant="text"
+              onClick={() => {
+                setTimer(30);
+                toast.info("Code resent!");
+              }}
+            >
+              Resend Code
+            </Button>
+          )}
         </Box>
       </form>
     </AuthCard>
