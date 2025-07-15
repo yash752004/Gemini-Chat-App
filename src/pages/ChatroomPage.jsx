@@ -36,42 +36,47 @@ const ChatroomPage = () => {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
- const handleSend = () => {
-  if (!text && !image) return;
+  const handleSend = () => {
+    if (!text && !image) return;
 
-  const inputText = text;
+    const inputText = text;
 
-  // Set typing true immediately on next tick:
-  setIsTyping(true);
-  const userMessage = {
-    id: uuidv4(),
-    sender: "user",
-    text,
-    image,
-    timestamp: new Date().toISOString(),
-  };
-
-  // Dispatch after small delay to allow UI update:
-  setTimeout(() => {
-    dispatch(addMessage({ chatroomId: id, message: userMessage }));
-
-    setText("");
-    setImage(null);
-
+    
+    // Delay to let React render the typing indicator
     setTimeout(() => {
-      const aiMessage = {
+      const userMessage = {
         id: uuidv4(),
-        sender: "ai",
-        text: generateFakeReply(inputText),
+        sender: "user",
+        text,
+        image,
         timestamp: new Date().toISOString(),
       };
-      dispatch(addMessage({ chatroomId: id, message: aiMessage }));
-      setIsTyping(false);
-    }, 1200);
-  }, 0);
-};
+      dispatch(addMessage({ chatroomId: id, message: userMessage }));
+
+      setText("");
+      setImage(null);
+      
+      setIsTyping(true); // Show typing indicator
+      setTimeout(() => {
+        const aiMessage = {
+          id: uuidv4(),
+          sender: "ai",
+          text: generateFakeReply(inputText),
+          timestamp: new Date().toISOString(),
+        };
+        dispatch(addMessage({ chatroomId: id, message: aiMessage }));
+
+        // Small delay before hiding typing indicator
+        setTimeout(() => {
+          setIsTyping(false);
+        }, 300);
+      }, 1200);
+    }, 100); // Small delay to show typing first
+  };
+
+
 
 
 
@@ -137,14 +142,7 @@ const ChatroomPage = () => {
           ref={scrollContainerRef}
           onScroll={handleScroll}
         >
-          {isTyping === true && (
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <Avatar>G</Avatar>
-              <Typography variant="body2" fontStyle="italic">
-                Gemini is typing...
-              </Typography>
-            </Box>
-          )}
+
 
           {messages.map((msg) => (
             <Box
@@ -213,6 +211,15 @@ const ChatroomPage = () => {
             </Box>
           ))}
 
+          {isTyping && (
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              <Avatar>G</Avatar>
+              <Typography variant="body2" fontStyle="italic">
+                Gemini is typing...
+              </Typography>
+            </Box>
+          )}
+
           {loadingMore && (
             <Box display="flex" justifyContent="center" my={2}>
               <CircularProgress size={20} />
@@ -221,6 +228,7 @@ const ChatroomPage = () => {
 
           <div ref={bottomRef} />
         </Box>
+
 
 
         {image && (
@@ -255,11 +263,13 @@ const ChatroomPage = () => {
         )}
 
 
+
         {/* Input */}
         <Box
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
+            // setIsTyping(true);
             handleSend();
           }}
           display="flex"

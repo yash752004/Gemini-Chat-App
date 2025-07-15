@@ -23,7 +23,7 @@ const VerifyPage = () => {
     handleSubmit,
     formState: { errors },
   } = useForm({
-    defaultValues: { code: "" },
+    defaultValues: { code: "123456" },
     resolver: zodResolver(otpSchema),
   });
 

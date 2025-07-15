@@ -2,10 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { Provider } from "react-redux";
-import { store } from "./store";
+import { store,persistor  } from "./store";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { getTheme } from "./theme/muiTheme";
 import { useSelector } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 
 const ThemedApp = () => {
   const mode = useSelector((state) => state.ui.themeMode);
@@ -19,7 +20,9 @@ const ThemedApp = () => {
 
 const Root = () => (
   <Provider store={store}>
-    <ThemedApp />
+   <PersistGate loading={null} persistor={persistor}>
+      <ThemedApp />
+    </PersistGate>
   </Provider>
 );
 
