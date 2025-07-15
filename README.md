@@ -1,5 +1,7 @@
 # 💬 Gemini-Style Conversational AI Chat App (Frontend Only)
 
+[Live Demo](https://gemini-chat-app-gamma.vercel.app/)
+
 This is a fully functional, responsive frontend application that simulates a conversational AI experience (similar to Google's Gemini). Built with **React**, **Redux**, **Material UI**, **React Hook Form + Zod**, it includes OTP-based login, chatroom management, AI-style replies, image messaging, and beautiful modern UX features.
 
 ---
