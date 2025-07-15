@@ -55,16 +55,12 @@ This is a fully functional, responsive frontend application that simulates a con
 ## 📂 Folder Structure
 
 src/
-├── assets/ # Icons, logos, etc.
 ├── components/ # Reusable UI components (e.g. ChatBubble)
 ├── features/ # Redux slices (auth, chat, ui)
-├── hooks/ # Custom hooks
-├── layouts/ # Layout wrappers (if any)
+├── layouts/ # Layout wrappers 
 ├── pages/ # Route-level views (Login, Dashboard, Chatroom)
-├── services/ # API calls (RESTCountries)
 ├── store/ # Redux store setup
 ├── theme/ # MUI theme customization
-├── utils/ # Helper functions (debounce, throttle, etc.)
 ├── validation/ # Zod schemas
-├── App.jsx
+├── App.js
 └── index.js
