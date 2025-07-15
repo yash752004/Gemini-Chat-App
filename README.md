@@ -64,3 +64,24 @@ src/
 ├── validation/ # Zod schemas
 ├── App.js
 └── index.js
+
+
+## 📸 Screenshots
+
+### 🔐 Login Screen
+![Login Screen](./assets/1.png)
+
+### 🔑 OTP Verification Screen
+![OTP Verification Screen](./assets/2.png)
+
+### 🏠 Dashboard Interface
+![Dashboard Interface](./assets/7.png)
+
+### ➕ Create Chatroom Interface
+![Create Chatroom Interface](./assets/4.png)
+
+### 🧭 Chatroom List View
+![Chatroom List](./assets/5.png)
+
+### 💬 Active Chatroom Interface
+![Chat Interface](./assets/6.png)
