@@ -105,11 +105,11 @@ const LoginPage = () => {
               fullWidth
               error={!!errors.phone}
               helperText={errors.phone?.message}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSubmit(onSubmit)();
-                }
-              }}
+              // onKeyDown={(e) => {
+              //   if (e.key === "Enter") {
+              //     handleSubmit(onSubmit)();
+              //   }
+              // }}
               sx={{
                 mb: 3,
                 bgcolor: "#0f172a",
